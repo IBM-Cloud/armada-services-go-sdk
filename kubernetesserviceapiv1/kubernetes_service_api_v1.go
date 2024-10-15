@@ -10642,13 +10642,6 @@ type UpdateSatelliteLocationOptions struct {
 
 	// The description of the Satellite location.
 	Description *string `json:"description,omitempty"`
-
-	// The ID of the resource group that the Satellite location is in. To list the resource group ID of the location, use
-	// the `GET /v2/satellite/getController` API method.
-	XAuthResourceGroup *string `json:"X-Auth-Resource-Group,omitempty"`
-
-	// Allows users to set headers on API requests
-	Headers map[string]string
 }
 
 // GraphQLRequest is the JSON request body for a GraphQL HTTP API call
@@ -10715,17 +10708,9 @@ func (kubernetesServiceApi *KubernetesServiceApiV1) UpdateSatelliteLocationWithC
 		return
 	}
 
-	for headerName, headerValue := range updateSatelliteLocationOptions.Headers {
-		builder.AddHeader(headerName, headerValue)
-	}
-
 	sdkHeaders := common.GetSdkHeaders("kubernetes_service_api", "V1", "UpdateSatelliteLocation")
 	for headerName, headerValue := range sdkHeaders {
 		builder.AddHeader(headerName, headerValue)
-	}
-	builder.AddHeader("Content-Type", "application/json")
-	if updateSatelliteLocationOptions.XAuthResourceGroup != nil {
-		builder.AddHeader("X-Auth-Resource-Group", fmt.Sprint(*updateSatelliteLocationOptions.XAuthResourceGroup))
 	}
 
 	body := GraphQLRequest{
@@ -10767,12 +10752,11 @@ func (kubernetesServiceApi *KubernetesServiceApiV1) UpdateSatelliteLocationWithC
 
 	//handle graphQL embedded error
 	if graphQLResponse.Errors != nil {
-		var e []byte
-		e, err = json.Marshal(graphQLResponse.Errors)
-		if err != nil {
-			return
+		var graphQLErrors []error
+		for _, graphQLErr := range *graphQLResponse.Errors {
+			graphQLErrors = append(graphQLErrors, errors.New(graphQLErr.Message + "(" + graphQLErr.Extensions["trace"].(string) + ")"))
 		}
-		err = errors.New(string(e))
+		err = errors.Join(graphQLErrors...)
 		return
 	}
 
@@ -10791,6 +10775,7 @@ func (kubernetesServiceApi *KubernetesServiceApiV1) UpdateSatelliteLocationWithC
 
 	return
 }
+
 
 // CreateSatelliteClusterRemote : Create an IBM Cloud Satellite cluster in a location that does not belong to your account
 // Create an OpenShift Container Platform cluster in an IBM Cloud Satellite location that belongs to another account.
