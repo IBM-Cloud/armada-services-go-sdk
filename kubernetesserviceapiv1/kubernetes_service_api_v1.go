@@ -10712,6 +10712,7 @@ func (kubernetesServiceApi *KubernetesServiceApiV1) UpdateSatelliteLocationWithC
 	for headerName, headerValue := range sdkHeaders {
 		builder.AddHeader(headerName, headerValue)
 	}
+	builder.AddHeader("Content-Type", "application/json")
 
 	body := GraphQLRequest{
 		Query: `
